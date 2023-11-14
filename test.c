@@ -12,6 +12,12 @@ typedef struct {
 } BookData;
 
 // 퀵 정렬 함수
+void swap(BookData* a, BookData* b) {
+    BookData temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
 void quickSort(BookData arr[], int left, int right) {
     int i = left, j = right;
     BookData pivot = arr[(left + right) / 2];
@@ -23,16 +29,13 @@ void quickSort(BookData arr[], int left, int right) {
         while (arr[j].category > pivot.category || (arr[j].category == pivot.category && arr[j].code > pivot.code) || (arr[j].category == pivot.category && arr[j].code == pivot.code && (arr[j].year > pivot.year || (arr[j].year == pivot.year && (arr[j].month > pivot.month || (arr[j].month == pivot.month && arr[j].day > pivot.day))))))
             j--;
         if (i <= j) {
-            // Swap
-            BookData temp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = temp;
+            // Swap 호출
+            swap(&arr[i], &arr[j]);
             i++;
             j--;
         }
     }
 
-    // 재귀적으로 정렬
     if (left < j) quickSort(arr, left, j);
     if (i < right) quickSort(arr, i, right);
 }
