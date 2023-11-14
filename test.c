@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -59,7 +60,7 @@ void parseCode(long long int code, long long int* category, long long int* codeN
 
 // 검색 결과를 형식에 맞게 출력
 void printSearchResult(int resultIndex, BookData book) {
-    printf("%d. '%03lld%03lld%04lld%02lld%02lld'\n", resultIndex, book.category, book.code, book.year, book.month, book.day);
+    printf("%d. %03lld%03lld%04lld%02lld%02lld\n", resultIndex, book.category, book.code, book.year, book.month, book.day);
 }
 
 
@@ -104,6 +105,56 @@ long long int getSearchInput(const char* prompt) {
         }
     }
     return input;
+}
+
+// 각 숫자가 입력에 존재하는지 확인하는 함수
+int isDigitPresent(char* input, char digit) {
+    for (int i = 0; i < strlen(input); i++) {
+        if (input[i] == digit) {
+            return 1; // 숫자가 존재함
+        }
+    }
+    return 0; // 숫자가 존재하지 않음
+}
+
+// 각 숫자에 따라 사용자에게 검색 기준을 입력 받는 함수
+void promptUserForSearchCriteria(char* input, long long int* searchCategory, long long int* searchCode, long long int* searchYear, long long int* searchMonth, long long int* searchDay) {
+    if (isDigitPresent(input, '1')) {
+        *searchCategory = getSearchInput("검색하려는 도서분류 값을 입력하세요 (-1은 무시): ");
+    }
+    if (isDigitPresent(input, '2')) {
+        *searchCode = getSearchInput("검색하려는 분류기호 값을 입력하세요 (-1은 무시): ");
+    }
+    if (isDigitPresent(input, '3')) {
+        *searchYear = getSearchInput("검색하려는 해당 년도를 입력하세요 (-1은 무시): ");
+    }
+    if (isDigitPresent(input, '4')) {
+        *searchMonth = getSearchInput("검색하려는 월을 입력하세요 (-1은 무시): ");
+    }
+    if (isDigitPresent(input, '5')) {
+        *searchDay = getSearchInput("검색하려는 해당일을 입력하세요 (-1은 무시): ");
+    }
+}
+
+// 중복된 숫자를 처리하고 고유한 숫자로 만드는 함수
+void removeDuplicateDigits(char* input) {
+    int len = strlen(input);
+    int currentIndex = 1;
+
+    for (int i = 1; i < len; i++) {
+        int j;
+        for (j = 0; j < currentIndex; j++) {
+            if (input[i] == input[j]) {
+                break;
+            }
+        }
+        if (j == currentIndex) {
+            input[currentIndex] = input[i];
+            currentIndex++;
+        }
+    }
+
+    input[currentIndex] = '\0'; // 문자열 끝에 널 문자 추가
 }
 
 int main() {
@@ -167,9 +218,25 @@ int main() {
     printf("4. 월\n");
     printf("5. 일\n");
 
+    char input[20];
     int selectedOption;
+
     while (true) {
-        if (scanf("%d", &selectedOption) == 1 && selectedOption >= 1 && selectedOption <= 5) {
+        printf("숫자를 입력하세요: ");
+        scanf("%s", input);
+
+        // 입력된 각 숫자를 확인하여 유효성 검사
+        bool validInput = true;
+        for (int i = 0; i < strlen(input); i++) {
+            int digit = input[i] - '0';
+            if (digit < 1 || digit > 5) {
+                validInput = false;
+                break;
+            }
+        }
+
+        if (validInput) {
+            // 올바른 값이 입력되면 반복문 종료
             break;
         }
         else {
@@ -178,24 +245,14 @@ int main() {
         }
     }
 
-    // 선택된 항목에 대해 값을 입력
-    switch (selectedOption) {
-    case 1:
-        searchCategory = getSearchInput("검색하려는 도서분류 값을 입력하세요 (-1은 무시): ");
-        break;
-    case 2:
-        searchCode = getSearchInput("검색하려는 분류기호 값을 입력하세요 (-1은 무시): ");
-        break;
-    case 3:
-        searchYear = getSearchInput("검색하려는 해당 년도를 입력하세요 (-1은 무시): ");
-        break;
-    case 4:
-        searchMonth = getSearchInput("검색하려는 월을 입력하세요 (-1은 무시): ");
-        break;
-    case 5:
-        searchDay = getSearchInput("검색하려는 해당일을 입력하세요 (-1은 무시): ");
-        break;
-    }
+    // 입력된 값 출력 또는 저장할 수 있도록 원하는 동작 수행
+    printf("입력된 값: %s\n", input);
+
+    // 중복된 숫자 처리
+    removeDuplicateDigits(input);
+
+    // 입력에 따라 사용자에게 검색 기준 입력 받음
+    promptUserForSearchCriteria(input, &searchCategory, &searchCode, &searchYear, &searchMonth, &searchDay);
 
     // 검색 함수 호출
     searchBooks(data, dataSize, searchCategory, searchCode, searchYear, searchMonth, searchDay);
