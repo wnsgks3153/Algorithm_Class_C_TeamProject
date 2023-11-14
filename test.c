@@ -94,7 +94,7 @@ int main() {
 
     // 정렬된 데이터 출력
     for (int i = 0; i < dataSize; i++) {
-        printf("도서분류: %03d, 분류기호: %03d, 날짜: %04d%02d%02d\n", data[i].category, data[i].code, data[i].year, data[i].month, data[i].day);
+        printf("도서분류: %03d, 분류기호: %03d, 년: %04d, 월: %02d, 일: %02d\n", data[i].category, data[i].code, data[i].year, data[i].month, data[i].day);
     }
 
     // 할당된 메모리 해제
