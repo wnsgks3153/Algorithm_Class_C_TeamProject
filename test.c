@@ -4,6 +4,13 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#define CLEAR_SCREEN() system("cls")
+#else
+#define CLEAR_SCREEN() system("clear")
+#endif
+
 typedef struct {
     long long int category;   // 도서분류
     long long int code;       // 분류기호
@@ -50,9 +57,20 @@ void parseCode(long long int code, long long int* category, long long int* codeN
     *day = code % 100;                        // 100으로 나눈 나머지가 일
 }
 
+// 검색 결과를 형식에 맞게 출력
+void printSearchResult(int resultIndex, BookData book) {
+    printf("%d. '%03lld%03lld%04lld%02lld%02lld'\n", resultIndex, book.category, book.code, book.year, book.month, book.day);
+}
+
+
 // 검색 함수
 void searchBooks(BookData arr[], int dataSize, long long int category, long long int code, long long int year, long long int month, long long int day) {
     bool found = false;
+    int resultIndex = 0;
+
+    CLEAR_SCREEN();
+
+    printf("[ 검색 결과 ]\n");
 
     // 검색된 도서코드를 출력
     for (int i = 0; i < dataSize; i++) {
@@ -61,7 +79,8 @@ void searchBooks(BookData arr[], int dataSize, long long int category, long long
             (year == -1 || arr[i].year == year) &&
             (month == -1 || arr[i].month == month) &&
             (day == -1 || arr[i].day == day)) {
-            printf("도서분류: %03d%03d%04d%02d%02d\n", arr[i].category, arr[i].code, arr[i].year, arr[i].month, arr[i].day);
+            resultIndex++;
+            printSearchResult(resultIndex, arr[i]);
             found = true;
         }
     }
