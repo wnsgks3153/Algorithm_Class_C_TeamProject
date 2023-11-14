@@ -159,12 +159,43 @@ int main() {
     long long int searchMonth = -1;
     long long int searchDay = -1;
 
-    // 사용자 입력을 받아 검색 조건 설정
-    searchCategory = getSearchInput("검색하려고 하는 도서분류 값을 입력하세요 (-1은 무시): ");
-    searchCode = getSearchInput("검색하려고 하는 분류기호 값을 입력하세요 (-1은 무시): ");
-    searchYear = getSearchInput("검색하려고 하는 해당 년도를 입력하세요 (-1은 무시): ");
-    searchMonth = getSearchInput("검색하려고 하는 월을 입력하세요 (-1은 무시): ");
-    searchDay = getSearchInput("검색하려고 하는 해당일을 입력하세요 (-1은 무시): ");
+    // 검색할 항목 선택
+    printf("검색하려는 항목을 선택하세요:\n");
+    printf("1. 도서분류\n");
+    printf("2. 분류기호\n");
+    printf("3. 년도\n");
+    printf("4. 월\n");
+    printf("5. 일\n");
+
+    int selectedOption;
+    while (true) {
+        if (scanf("%d", &selectedOption) == 1 && selectedOption >= 1 && selectedOption <= 5) {
+            break;
+        }
+        else {
+            printf("잘못된 입력입니다. 다시 입력하세요.\n");
+            while (getchar() != '\n');  // 버퍼 비우기
+        }
+    }
+
+    // 선택된 항목에 대해 값을 입력
+    switch (selectedOption) {
+    case 1:
+        searchCategory = getSearchInput("검색하려는 도서분류 값을 입력하세요 (-1은 무시): ");
+        break;
+    case 2:
+        searchCode = getSearchInput("검색하려는 분류기호 값을 입력하세요 (-1은 무시): ");
+        break;
+    case 3:
+        searchYear = getSearchInput("검색하려는 해당 년도를 입력하세요 (-1은 무시): ");
+        break;
+    case 4:
+        searchMonth = getSearchInput("검색하려는 월을 입력하세요 (-1은 무시): ");
+        break;
+    case 5:
+        searchDay = getSearchInput("검색하려는 해당일을 입력하세요 (-1은 무시): ");
+        break;
+    }
 
     // 검색 함수 호출
     searchBooks(data, dataSize, searchCategory, searchCode, searchYear, searchMonth, searchDay);
