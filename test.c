@@ -90,6 +90,22 @@ void searchBooks(BookData arr[], int dataSize, long long int category, long long
     }
 }
 
+// 검색 입력을 받는 함수
+long long int getSearchInput(const char* prompt) {
+    long long int input;
+    while (true) {
+        printf("%s", prompt);
+        if (scanf("%lld", &input) == 1) {
+            break;
+        }
+        else {
+            printf("잘못된 입력입니다. 다시 입력하세요.\n");
+            while (getchar() != '\n');  // 버퍼 비우기
+        }
+    }
+    return input;
+}
+
 int main() {
     // 파일 읽기
     FILE* file = fopen("library.csv", "r");
@@ -144,16 +160,11 @@ int main() {
     long long int searchDay = -1;
 
     // 사용자 입력을 받아 검색 조건 설정
-    printf("도서분류를 입력하세요 (-1은 무시): ");
-    scanf("%lld", &searchCategory);
-    printf("분류기호를 입력하세요 (-1은 무시): ");
-    scanf("%lld", &searchCode);
-    printf("년을 입력하세요 (-1은 무시): ");
-    scanf("%lld", &searchYear);
-    printf("월을 입력하세요 (-1은 무시): ");
-    scanf("%lld", &searchMonth);
-    printf("일을 입력하세요 (-1은 무시): ");
-    scanf("%lld", &searchDay);
+    searchCategory = getSearchInput("검색하려고 하는 도서분류 값을 입력하세요 (-1은 무시): ");
+    searchCode = getSearchInput("검색하려고 하는 분류기호 값을 입력하세요 (-1은 무시): ");
+    searchYear = getSearchInput("검색하려고 하는 해당 년도를 입력하세요 (-1은 무시): ");
+    searchMonth = getSearchInput("검색하려고 하는 월을 입력하세요 (-1은 무시): ");
+    searchDay = getSearchInput("검색하려고 하는 해당일을 입력하세요 (-1은 무시): ");
 
     // 검색 함수 호출
     searchBooks(data, dataSize, searchCategory, searchCode, searchYear, searchMonth, searchDay);
