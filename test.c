@@ -75,11 +75,13 @@ void searchBooks(BookData arr[], int dataSize, long long int category, long long
 
     // 검색된 도서코드를 출력
     for (int i = 0; i < dataSize; i++) {
-        if ((category == -1 || arr[i].category == category) &&
-            (code == -1 || arr[i].code == code) &&
-            (year == -1 || arr[i].year == year) &&
-            (month == -1 || arr[i].month == month) &&
-            (day == -1 || arr[i].day == day)) {
+        if (
+            (category == arr[i].category || category < 0) &&
+            (code == arr[i].code || code < 0) &&
+            (year == arr[i].year || year < 0) &&
+            (month == arr[i].month || month < 0) &&
+            (day == arr[i].day || day < 0)
+            ) {
             resultIndex++;
             printSearchResult(resultIndex, arr[i]);
             found = true;
@@ -118,21 +120,42 @@ int isDigitPresent(char* input, char digit) {
 }
 
 // 각 숫자에 따라 사용자에게 검색 기준을 입력 받는 함수
+// 각 숫자에 따라 사용자에게 검색 기준을 입력 받는 함수
 void promptUserForSearchCriteria(char* input, long long int* searchCategory, long long int* searchCode, long long int* searchYear, long long int* searchMonth, long long int* searchDay) {
     if (isDigitPresent(input, '1')) {
-        *searchCategory = getSearchInput("검색하려는 도서분류 값을 입력하세요 (-1은 무시): ");
+        *searchCategory = getSearchInput("검색하려는 도서분류 값을 입력하세요 : ");
+        while (*searchCategory < 0) {
+            printf("올바르지 않은 값입니다. 다시 입력하세요.\n");
+            *searchCategory = getSearchInput("검색하려는 도서분류 값을 입력하세요 : ");
+        }
     }
     if (isDigitPresent(input, '2')) {
-        *searchCode = getSearchInput("검색하려는 분류기호 값을 입력하세요 (-1은 무시): ");
+        *searchCode = getSearchInput("검색하려는 분류기호 값을 입력하세요 : ");
+        while (*searchCode < 0) {
+            printf("올바르지 않은 값입니다. 다시 입력하세요.\n");
+            *searchCode = getSearchInput("검색하려는 분류기호 값을 입력하세요 : ");
+        }
     }
     if (isDigitPresent(input, '3')) {
-        *searchYear = getSearchInput("검색하려는 해당 년도를 입력하세요 (-1은 무시): ");
+        *searchYear = getSearchInput("검색하려는 해당 년도를 입력하세요 : ");
+        while (*searchYear < 0) {
+            printf("올바르지 않은 값입니다. 다시 입력하세요.\n");
+            *searchYear = getSearchInput("검색하려는 해당 년도를 입력하세요 : ");
+        }
     }
     if (isDigitPresent(input, '4')) {
-        *searchMonth = getSearchInput("검색하려는 월을 입력하세요 (-1은 무시): ");
+        *searchMonth = getSearchInput("검색하려는 월을 입력하세요 : ");
+        while (*searchMonth < 0) {
+            printf("올바르지 않은 값입니다. 다시 입력하세요.\n");
+            *searchMonth = getSearchInput("검색하려는 월을 입력하세요 : ");
+        }
     }
     if (isDigitPresent(input, '5')) {
-        *searchDay = getSearchInput("검색하려는 해당일을 입력하세요 (-1은 무시): ");
+        *searchDay = getSearchInput("검색하려는 해당일을 입력하세요 : ");
+        while (*searchDay < 0) {
+            printf("올바르지 않은 값입니다. 다시 입력하세요.\n");
+            *searchDay = getSearchInput("검색하려는 해당일을 입력하세요 : ");
+        }
     }
 }
 
