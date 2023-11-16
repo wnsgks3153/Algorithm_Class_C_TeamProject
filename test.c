@@ -150,6 +150,15 @@ void promptUserForSearchCriteria(char* input, long long int* searchCategory, lon
     }
 }
 
+// 도서코드를 출력하는 함수
+void printAllBooks(BookData arr[], int dataSize) {
+    printf("[ 도서코드 전체 리스트 ]\n");
+    for (int i = 0; i < dataSize; i++) {
+        printf("%d. %lld%lld%lld%lld%lld\n", i + 1, arr[i].category, arr[i].code, arr[i].year, arr[i].month, arr[i].day);
+    }
+    
+}
+
 // 검색 함수
 void searchBooks(BookData arr[], int dataSize) {
 
@@ -228,7 +237,7 @@ void searchBooks(BookData arr[], int dataSize) {
     if (!found) {
         printf("일치하는 도서코드가 없습니다.\n");
     }
-    
+
 }
 
 // 도서를 데이터 배열에 추가하는 함수
@@ -329,10 +338,11 @@ void deleteBook(BookData arr[], int* dataSize) {
 // 메인 메뉴 함수
 void showMainMenu() {
     printf("도서 관리 프로그램\n");
-    printf("1. 도서코드 검색\n");
-    printf("2. 도서코드 추가\n");
-    printf("3. 도서코드 수정\n");
-    printf("4. 도서코드 삭제\n");
+    printf("1. 도서코드 전체 리스트 출력\n");
+    printf("2. 도서코드 검색\n");
+    printf("3. 도서코드 추가\n");
+    printf("4. 도서코드 수정\n");
+    printf("5. 도서코드 삭제\n");
     printf("0. 프로그램 종료\n");
 }
 
@@ -346,18 +356,22 @@ int runMainMenu(BookData arr[], int* dataSize, int* currentSize) {
 
         switch (choice) {
         case 1:
+            // 도서코드 전체 리스트 확인
+            printAllBooks(arr, *dataSize);
+            break;
+        case 2:
             // 도서코드 검색
             searchBooks(arr, *dataSize);
             break;
-        case 2:
+        case 3:
             // 도서코드 추가
             addBook(arr, dataSize, currentSize);
             break;
-        case 3:
+        case 4:
             // 도서코드 수정
             modifyBook(arr, *dataSize);
             break;
-        case 4:
+        case 5:
             // 도서코드 삭제
             deleteBook(arr, dataSize);
             break;
