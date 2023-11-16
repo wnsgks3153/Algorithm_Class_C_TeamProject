@@ -152,6 +152,9 @@ void promptUserForSearchCriteria(char* input, long long int* searchCategory, lon
 
 // 검색 함수
 void searchBooks(BookData arr[], int dataSize) {
+
+    CLEAR_SCREEN();
+
     long long int searchCategory;
     long long int searchCode;
     long long int searchYear;
@@ -225,10 +228,14 @@ void searchBooks(BookData arr[], int dataSize) {
     if (!found) {
         printf("일치하는 도서코드가 없습니다.\n");
     }
+    
 }
 
 // 도서를 데이터 배열에 추가하는 함수
 void addBook(BookData arr[], int* dataSize, int* currentSize) {
+
+    CLEAR_SCREEN();
+
     if (*dataSize == *currentSize) {
         // 배열이 꽉 찼을 경우 크기를 두 배로 늘립니다.
         *currentSize *= 2;
@@ -256,6 +263,9 @@ void addBook(BookData arr[], int* dataSize, int* currentSize) {
 
 // 도서를 데이터 배열에서 수정하는 함수
 void modifyBook(BookData arr[], int dataSize) {
+
+    CLEAR_SCREEN();
+
     long long int searchCode;
     printf("수정하려는 도서의 도서코드를 입력하세요: ");
     scanf("%lld", &searchCode);
@@ -290,6 +300,9 @@ void modifyBook(BookData arr[], int dataSize) {
 
 // 도서를 데이터 배열에서 삭제하는 함수
 void deleteBook(BookData arr[], int* dataSize) {
+
+    CLEAR_SCREEN();
+
     long long int searchCode;
     printf("삭제하려는 도서의 도서코드를 입력하세요: ");
     scanf("%lld", &searchCode);
@@ -322,6 +335,62 @@ void showMainMenu() {
     printf("4. 도서코드 삭제\n");
     printf("0. 프로그램 종료\n");
 }
+
+int runMainMenu(BookData arr[], int* dataSize, int* currentSize) {
+    int choice = -1;
+
+    do {
+        showMainMenu();
+        printf("원하는 작업을 선택하세요: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+        case 1:
+            // 도서코드 검색
+            searchBooks(arr, *dataSize);
+            break;
+        case 2:
+            // 도서코드 추가
+            addBook(arr, dataSize, currentSize);
+            break;
+        case 3:
+            // 도서코드 수정
+            modifyBook(arr, *dataSize);
+            break;
+        case 4:
+            // 도서코드 삭제
+            deleteBook(arr, dataSize);
+            break;
+        case 0:
+            // 프로그램 종료
+            printf("프로그램을 종료합니다.\n");
+            break;
+        default:
+            printf("잘못된 입력입니다. 다시 입력하세요.\n");
+            break;
+        }
+
+        if (choice != 0) {
+            // 사용자에게 메인 메뉴로 돌아가겠냐는 여부를 물어봅니다.
+            char returnToMain;
+            printf("메인 화면으로 돌아가시겠습니까? [y/n] : ");
+            scanf(" %c", &returnToMain);
+
+            if (returnToMain != 'y') {
+                choice = 0; // 사용자가 돌아가기를 원하지 않으면 루프를 종료하여 프로그램 종료
+            }
+            else {
+                // 선택이 'y'인 경우, 메인 화면으로 돌아가기 전에 화면을 지우도록 설정
+                CLEAR_SCREEN();
+            }
+        }
+
+    } while (choice != 0); // 0은 프로그램을 종료합니다.
+
+    // 계속할지 종료할지를 나타내는 값을 반환
+    return choice;
+}
+
 
 int main() {
     // 파일 읽기
@@ -369,39 +438,11 @@ int main() {
     // 퀵 정렬 수행
     quickSort(data, 0, dataSize - 1);
 
-    int choice = -1;
+    int continueProgram;
 
     do {
-        showMainMenu();
-        printf("원하는 작업을 선택하세요: ");
-        scanf("%d", &choice);
-
-        switch (choice) {
-        case 1:
-            // 도서코드 검색
-            searchBooks(data, dataSize);
-            break;
-        case 2:
-            // 도서코드 추가
-            addBook(data, &dataSize, &currentSize);
-            break;
-        case 3:
-            // 도서코드 수정
-            modifyBook(data, dataSize);
-            break;
-        case 4:
-            // 도서코드 삭제
-            deleteBook(data, &dataSize);
-            break;
-        case 0:
-            // 프로그램 종료
-            printf("프로그램을 종료합니다.\n");
-            break;
-        default:
-            printf("잘못된 입력입니다. 다시 입력하세요.\n");
-            break;
-        }
-    } while (choice != 0); // 0을 선택하면 루프를 탈출합니다.
+        continueProgram = runMainMenu(data, &dataSize, &currentSize);
+    } while (continueProgram != 0);
 
     // 할당된 메모리 해제
     free(data);
