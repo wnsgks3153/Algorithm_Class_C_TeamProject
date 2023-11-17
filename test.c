@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -156,7 +157,7 @@ void printAllBooks(BookData arr[], int dataSize) {
     for (int i = 0; i < dataSize; i++) {
         printf("%d. %lld%lld%lld%lld%lld\n", i + 1, arr[i].category, arr[i].code, arr[i].year, arr[i].month, arr[i].day);
     }
-    
+
 }
 
 // 검색 함수
@@ -240,9 +241,101 @@ void searchBooks(BookData arr[], int dataSize) {
 
 }
 
+// 비정상적인 코드를 대체 코드로 생성
+void generateReplacementCode(char* replacementCode) {
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+
+    // 'NSC(현재 날짜)' 형태로 대체 코드 생성
+    sprintf(replacementCode, "NSC%d%02d%02d", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+}
+
+void handleInvalidCode(long long int code) {
+    char replacementCode[20];
+    int invalidInputCount = 0;
+
+    generateReplacementCode(replacementCode);
+
+    // 파일에 비정상적인 코드 추가
+    FILE* file = fopen("library.csv", "a");
+    if (file == NULL) {
+        perror("파일을 열 수 없습니다.");
+        exit(1);
+    }
+    fprintf(file, "NSC%s\n", replacementCode);
+    fclose(file);
+
+    // 사용자에게 대체된 코드 알림
+    printf("비정상적인 코드가 감지되어 대체 코드로 교체되었습니다: %s\n", replacementCode);
+
+    char returnToMain;  // 변수를 초기화
+
+}
+
+// 도서코드가 올바른 값인지 검사하는 함수
+int isValidBookCode(long long int code) {
+    // 1. 0 이상의 양수인 정수값이 아닌 경우
+    if (code < 0) {
+        handleInvalidCode(code);
+        return -1; // 비정상 값
+    }
+
+    char codeString[20];
+    // 2. 각 항목의 자릿수 합보다 많은 경우
+    sprintf(codeString, "%lld", code);
+    if (strlen(codeString) != 14) {
+        handleInvalidCode(code);
+        return -1; // 비정상 값
+    }
+
+    // 3. 문자형 데이터가 삽입된 경우
+    for (int i = 0; i < strlen(codeString); i++) {
+        if (!isdigit(codeString[i])) {
+            handleInvalidCode(code);
+            return -1; // 비정상 값
+        }
+    }
+
+    // 모든 검사를 통과하면 유효성 검사 성공
+    return 1; // 정상 값
+}
+
+// 날짜(년, 월, 일)가 유효한지 확인하는 함수
+bool isValidDate(long long int year, long long int month, long long int day) {
+    // 윤년 여부 확인
+    bool isLeapYear = ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
+
+    // 월별 최대 일 수 배열
+    int maxDays[] = { 0, 31, (isLeapYear ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
+    // 날짜 범위 및 일 수 확인
+    return (year >= 0 && month >= 1 && month <= 12 && day >= 1 && day <= maxDays[month]);
+}
+
+// 도서코드의 날짜(년, 월, 일)가 유효한지 확인하고, 유효하지 않은 경우 경고 메시지를 출력하고 다시 입력을 받는 함수
+void validateDateInput(long long int* year, long long int* month, long long int* day) {
+    while (true) {
+        // 사용자로부터 년, 월, 일을 입력 받음
+        printf("년 입력: ");
+        scanf("%lld", year);
+        printf("월 입력: ");
+        scanf("%lld", month);
+        printf("일 입력: ");
+        scanf("%lld", day);
+
+        // 입력받은 날짜가 유효한지 확인
+        if (isValidDate(*year, *month, *day)) {
+            break;  // 유효한 날짜이면 반복문 종료
+        }
+        else {
+            // 유효하지 않은 날짜인 경우 경고 메시지 출력 및 다시 입력 받음
+            printf("날짜(년, 월, 일)가 유효하지 않습니다. 다시 입력하세요.\n");
+        }
+    }
+}
+
 // 도서를 데이터 배열에 추가하는 함수
 void addBook(BookData arr[], int* dataSize, int* currentSize) {
-
     CLEAR_SCREEN();
 
     if (*dataSize == *currentSize) {
@@ -256,18 +349,51 @@ void addBook(BookData arr[], int* dataSize, int* currentSize) {
     }
 
     // 새로운 도서에 대한 입력을 받습니다.
-    printf("도서분류 입력: ");
-    scanf("%lld", &arr[*dataSize].category);
-    printf("분류기호 입력: ");
-    scanf("%lld", &arr[*dataSize].code);
-    printf("년도 입력: ");
-    scanf("%lld", &arr[*dataSize].year);
-    printf("월 입력: ");
-    scanf("%lld", &arr[*dataSize].month);
-    printf("일 입력: ");
-    scanf("%lld", &arr[*dataSize].day);
+    long long int category, code, year, month, day;
 
-    (*dataSize)++;
+    // 모든 항목의 값을 입력 받음
+    printf("도서분류 입력: ");
+    scanf("%lld", &category);
+
+    printf("분류기호 입력: ");
+    scanf("%lld", &code);
+
+    printf("년도 입력: ");
+    scanf("%lld", &year);
+
+    printf("월 입력: ");
+    scanf("%lld", &month);
+
+    printf("일 입력: ");
+    scanf("%lld", &day);
+
+    // 입력된 코드를 검사하여 정상적인지 확인
+    int isValidBook = isValidBookCode(code);
+
+    if (isValidBook == 1) {
+        // 입력된 코드가 정상적인 경우, 날짜 유효성 검사를 수행
+        validateDateInput(&year, &month, &day);
+
+        // 유효한 날짜인 경우, 도서를 배열에 추가
+
+        // 파일에 코드 추가
+        FILE* file = fopen("library.csv", "a");
+        if (file == NULL) {
+            perror("파일을 열 수 없습니다.");
+            exit(1);
+        }
+        fprintf(file, "%03lld%03lld%04lld%02lld%02lld\n", category, code, year, month, day);
+        fclose(file);
+
+        // 배열에 도서 추가
+        arr[*dataSize].category = category;
+        arr[*dataSize].code = code;
+        arr[*dataSize].year = year;
+        arr[*dataSize].month = month;
+        arr[*dataSize].day = day;
+
+        (*dataSize)++;
+    }
 }
 
 // 도서를 데이터 배열에서 수정하는 함수
@@ -457,7 +583,7 @@ int main() {
     do {
         continueProgram = runMainMenu(data, &dataSize, &currentSize);
     } while (continueProgram != 0);
-
+    
     // 할당된 메모리 해제
     free(data);
 
