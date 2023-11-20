@@ -18,8 +18,9 @@
 
 
 typedef struct {
+    long long int code;       // 도서코드전체(14자리)
     long long int category;   // 도서분류
-    long long int code;       // 분류기호
+    long long int group;      // 분류기호
     long long int year;       // 연도
     long long int month;      // 월
     long long int day;        // 일
@@ -38,9 +39,9 @@ void quickSort(BookData arr[], int left, int right) {
 
     // 분할
     while (i <= j) {
-        while (arr[i].category < pivot.category || (arr[i].category == pivot.category && arr[i].code < pivot.code) || (arr[i].category == pivot.category && arr[i].code == pivot.code && (arr[i].year < pivot.year || (arr[i].year == pivot.year && (arr[i].month < pivot.month || (arr[i].month == pivot.month && arr[i].day < pivot.day))))))
+        while (arr[i].category < pivot.category || (arr[i].category == pivot.category && arr[i].group < pivot.group) || (arr[i].category == pivot.category && arr[i].group == pivot.group && (arr[i].year < pivot.year || (arr[i].year == pivot.year && (arr[i].month < pivot.month || (arr[i].month == pivot.month && arr[i].day < pivot.day))))))
             i++;
-        while (arr[j].category > pivot.category || (arr[j].category == pivot.category && arr[j].code > pivot.code) || (arr[j].category == pivot.category && arr[j].code == pivot.code && (arr[j].year > pivot.year || (arr[j].year == pivot.year && (arr[j].month > pivot.month || (arr[j].month == pivot.month && arr[j].day > pivot.day))))))
+        while (arr[j].category > pivot.category || (arr[j].category == pivot.category && arr[j].group > pivot.group) || (arr[j].category == pivot.category && arr[j].group == pivot.group && (arr[j].year > pivot.year || (arr[j].year == pivot.year && (arr[j].month > pivot.month || (arr[j].month == pivot.month && arr[j].day > pivot.day))))))
             j--;
         if (i <= j) {
             // Swap 호출
@@ -55,9 +56,9 @@ void quickSort(BookData arr[], int left, int right) {
 }
 
 // 각 자릿수를 분리하여 구조체 멤버에 저장
-void parseCode(long long int code, long long int* category, long long int* codeNum, long long int* year, long long int* month, long long int* day) {
+void parseCode(long long int code, long long int* category, long long int* group, long long int* year, long long int* month, long long int* day) {
     *category = code / 100000000000;          // 10억으로 나누면 천의 자리가 남음
-    *codeNum = (code / 100000000) % 100000;   // 백만으로 나눈 나머지를 천으로 나누면 백의 자리가 남음
+    *group = (code / 100000000) % 100000;   // 백만으로 나눈 나머지를 천으로 나누면 백의 자리가 남음
     *year = (code % 100000000) / 10000;       // 10000으로 나누면 연도가 나옴
     *month = (code % 10000) / 100;            // 100으로 나누면 월이 나옴
     *day = code % 100;                        // 100으로 나눈 나머지가 일
@@ -66,7 +67,7 @@ void parseCode(long long int code, long long int* category, long long int* codeN
 
 // 검색 결과를 형식에 맞게 출력
 void printSearchResult(int resultIndex, BookData book) {
-    printf("%d. %03lld%03lld%04lld%02lld%02lld\n", resultIndex, book.category, book.code, book.year, book.month, book.day);
+    printf("%d. %03lld%03lld%04lld%02lld%02lld\n", resultIndex, book.category, book.group, book.year, book.month, book.day);
 }
 
 // 중복된 숫자를 처리하고 고유한 숫자로 만드는 함수
@@ -117,7 +118,7 @@ int isDigitPresent(char* input, char digit) {
 }
 
 // 각 숫자에 따라 사용자에게 검색 기준을 입력 받는 함수
-void promptUserForSearchCriteria(char* input, long long int* searchCategory, long long int* searchCode, long long int* searchYear, long long int* searchMonth, long long int* searchDay) {
+void promptUserForSearchCriteria(char* input, long long int* searchCategory, long long int* searchGroup, long long int* searchYear, long long int* searchMonth, long long int* searchDay) {
     if (isDigitPresent(input, '1')) {
         *searchCategory = getSearchInput("검색하려는 도서분류 값을 입력하세요 : ");
         while (*searchCategory < 0) {
@@ -126,10 +127,10 @@ void promptUserForSearchCriteria(char* input, long long int* searchCategory, lon
         }
     }
     if (isDigitPresent(input, '2')) {
-        *searchCode = getSearchInput("검색하려는 분류기호 값을 입력하세요 : ");
-        while (*searchCode < 0) {
+        *searchGroup = getSearchInput("검색하려는 분류기호 값을 입력하세요 : ");
+        while (*searchGroup < 0) {
             printf("올바르지 않은 값입니다. 다시 입력하세요.\n");
-            *searchCode = getSearchInput("검색하려는 분류기호 값을 입력하세요 : ");
+            *searchGroup = getSearchInput("검색하려는 분류기호 값을 입력하세요 : ");
         }
     }
     if (isDigitPresent(input, '3')) {
@@ -158,7 +159,7 @@ void promptUserForSearchCriteria(char* input, long long int* searchCategory, lon
 // 페이지 출력 함수
 void printPage(BookData arr[], int dataSize, int startIdx, int endIdx) {
     for (int i = startIdx; i <= endIdx; i++) {
-        printf("%d. %03lld%03lld%04lld%02lld%02lld\n", i + 1, arr[i].category, arr[i].code, arr[i].year, arr[i].month, arr[i].day);
+        printf("%d. %03lld%03lld%04lld%02lld%02lld\n", i + 1, arr[i].category, arr[i].group, arr[i].year, arr[i].month, arr[i].day);
     }
 }
 
@@ -170,36 +171,21 @@ void printAllBooks(BookData arr[], int dataSize) {
 
     int currentPage = 1;
     int startIdx = 0;
-    int endIdx = BOOKS_PER_PAGE - 1;
+    int endIdx = (dataSize < BOOKS_PER_PAGE) ? dataSize - 1 : BOOKS_PER_PAGE - 1;
 
     while (true) {
         printPage(arr, dataSize, startIdx, endIdx);
 
         // 다음 페이지 또는 이전 페이지로 이동할지 여부 묻기
         char moveKey;
-        if (currentPage == 1 && totalPages > 1) {
-            // 첫 페이지인 경우 다음 페이지로만 이동 가능
-            printf("[ 도서코드 전체 리스트 (페이지 %d / %d) ]\n", currentPage, totalPages);
-            printf("\n다음 페이지로 이동[n] 종료[q]\n");
-            printf("선택: ");
-            scanf(" %c", &moveKey);
-            if (moveKey == 'n') {
-                startIdx += BOOKS_PER_PAGE;
-                endIdx = (endIdx + BOOKS_PER_PAGE < dataSize - 1) ? endIdx + BOOKS_PER_PAGE : dataSize - 1;
-                currentPage++;
-                CLEAR_SCREEN();
-            }
-            else if (moveKey == 'q') {
-                break;
-            }
-        }
-        else if (currentPage == totalPages && totalPages > 1) {
+        if (currentPage == totalPages) {
             // 마지막 페이지인 경우 이전 페이지로만 이동 가능
             printf("[ 도서코드 전체 리스트 (페이지 %d / %d) ]\n", currentPage, totalPages);
             printf("\n이전 페이지로 이동[p] 종료[q]\n");
             printf("선택: ");
             scanf(" %c", &moveKey);
-            if (moveKey == 'p') {
+            if (moveKey == 'p' && currentPage > 1) {
+                // 이전 페이지로 이동
                 startIdx -= BOOKS_PER_PAGE;
                 endIdx = startIdx + BOOKS_PER_PAGE - 1;
                 currentPage--;
@@ -243,7 +229,7 @@ void searchBooks(BookData arr[], int dataSize) {
     CLEAR_SCREEN();
 
     long long int searchCategory;
-    long long int searchCode;
+    long long int searchGroup;
     long long int searchYear;
     long long int searchMonth;
     long long int searchDay;
@@ -289,25 +275,26 @@ void searchBooks(BookData arr[], int dataSize) {
     removeDuplicateDigits(input);
 
     // 입력에 따라 사용자에게 검색 기준 입력 받음
-    promptUserForSearchCriteria(input, &searchCategory, &searchCode, &searchYear, &searchMonth, &searchDay);
+    promptUserForSearchCriteria(input, &searchCategory, &searchGroup, &searchYear, &searchMonth, &searchDay);
 
     // 실제 검색 수행
     bool found = false;
     int resultIndex = 0;
 
+    CLEAR_SCREEN();
     printf("[ 검색 결과 ]\n");
 
     // 검색된 도서코드를 출력
     for (int i = 0; i < dataSize; i++) {
         if (
             (searchCategory == arr[i].category || searchCategory < 0) &&
-            (searchCode == arr[i].code || searchCode < 0) &&
+            (searchGroup == arr[i].group || searchGroup < 0) &&
             (searchYear == arr[i].year || searchYear < 0) &&
             (searchMonth == arr[i].month || searchMonth < 0) &&
             (searchDay == arr[i].day || searchDay < 0)
             ) {
             resultIndex++;
-            printf("%d. %03lld%03lld%04lld%02lld%02lld\n", resultIndex, arr[i].category, arr[i].code, arr[i].year, arr[i].month, arr[i].day);
+            printf("%d. %03lld%03lld%04lld%02lld%02lld\n", resultIndex, arr[i].category, arr[i].group, arr[i].year, arr[i].month, arr[i].day);
             found = true;
         }
     }
@@ -317,9 +304,10 @@ void searchBooks(BookData arr[], int dataSize) {
     }
 
 }
+
 // 파일에 도서 코드를 추가하는 함수
 void writeBookToFile(FILE* file, BookData book) {
-    fprintf(file, "%03lld%03lld%04lld%02lld%02lld\n", book.category, book.code, book.year, book.month, book.day);
+    fprintf(file, "%03lld%03lld%04lld%02lld%02lld\n", book.category, book.group, book.year, book.month, book.day);
 }
 
 // 비정상적인 값을 뜻하는 대체 코드 생성
@@ -365,171 +353,199 @@ bool isValidDate(long long int year, long long int month, long long int day) {
 }
 
 // 새로운 도서를 데이터 배열에 추가하는 함수
-void addBook(BookData arr[], int* dataSize, int* currentSize) {
+void addBook(BookData arr[], int* dataSize) {
     CLEAR_SCREEN();
+    char inputCode[15];  // 코드를 입력받을 문자열, 코드는 14자리이며 널 종료 문자를 고려해 15로 설정
+    long long int code;
 
-    // 새로운 도서 정보 입력
-    char input[20];
-    printf("추가할 새로운 도서의 도서코드를 입력하세요: ");
-    scanf("%s", input);
+    // 단계 1: 도서 코드 입력 (문자열로)
+    while (true) {
+        printf("도서코드를 입력하세요: ");
+        scanf("%s", inputCode);
 
-    // 입력 값이 정상적인지 확인
-    if (!isValidCode(input)) {
-        printf("입력된 값이 비정상적입니다. 대체 코드를 생성하여 추가합니다.\n");
-        generateReplacementCode(input);
+        // 단계 2: 입력이 문자열 또는 양의 정수인지 확인
+        if (isValidCode(inputCode)) {
+            // 문자열을 long long int로 변환
+            code = atoll(inputCode);
 
-        FILE* file = fopen("library.csv", "a");
-        if (file == NULL) {
-            perror("파일을 열 수 없습니다.");
-            return;
+            // 단계 3: 코드에 유효한 날짜가 있는지 확인
+            long long int category, group, year, month, day;
+            parseCode(code, &category, &group, &year, &month, &day);
+
+            // 날짜가 유효하지 않은 경우 다시 입력 받음
+            if (!isValidDate(year, month, day)) {
+                CLEAR_SCREEN();
+                printf("유효하지 않은 날짜입니다. 다시 입력하세요.\n");
+                continue;
+            }
+
+            // 코드가 유효한 경우, 책을 파일에 추가
+            FILE* file = fopen("library.csv", "a");
+            if (file == NULL) {
+                CLEAR_SCREEN();
+                perror("파일을 열 수 없습니다.");
+                return;
+            }
+
+            // 파일에 도서를 작성
+            writeBookToFile(file, (BookData) { code, category, group, year, month, day });
+
+            // 파일 닫기
+            fclose(file);
+
+            printf("도서가 성공적으로 추가되었습니다.\n");
+            break;
         }
+        else {
+            // 비정상적인 코드인 경우 대체 코드를 생성하여 파일에 추가
+            printf("잘못된 도서코드 형식입니다. 대체 코드를 생성하여 추가합니다.\n");
 
-        // 대체 코드를 파일에 삽입
-        fprintf(file, "%s\n", input);
+            char replacementCode[15];
+            generateReplacementCode(replacementCode);
 
-        fclose(file);
+            FILE* file = fopen("library.csv", "a");
+            if (file == NULL) {
+                CLEAR_SCREEN();
+                perror("파일을 열 수 없습니다.");
+                return;
+            }
 
-        // 삽입된 도서 코드 대신 삽입된 비정상적인 코드 출력
-        printf("도서가 추가되었습니다. 삽입된 대체 코드: %s\n", input);
+            // 대체 코드를 파일에 작성
+            fprintf(file, "%s\n", replacementCode);
 
-        (*dataSize)++;
-        return;
-    }
+            // 파일 닫기
+            fclose(file);
 
-    // 배열 크기가 부족하면 두 배로 확장
-    if (*dataSize == *currentSize) {
-        *currentSize *= 2;
-        arr = realloc(arr, *currentSize * sizeof(BookData));
-        if (arr == NULL) {
-            perror("메모리를 재할당할 수 없습니다.");
-            return;
+            printf("추가된 대체코드 : %s\n", replacementCode);
+            break;
         }
     }
-
-    // 새로운 도서 정보를 배열에 추가
-    arr[*dataSize].code = atoll(input);
-    parseCode(arr[*dataSize].code, &arr[*dataSize].category, &arr[*dataSize].code, &arr[*dataSize].year, &arr[*dataSize].month, &arr[*dataSize].day);
-
-    // 날짜 유효성 검사
-    while (!isValidDate(arr[*dataSize].year, arr[*dataSize].month, arr[*dataSize].day)) {
-        printf("유효하지 않은 날짜입니다. 다시 입력하세요.\n");
-
-        // 날짜를 다시 입력
-        printf("년도를 입력하세요: ");
-        scanf("%lld", &arr[*dataSize].year);
-        printf("월을 입력하세요: ");
-        scanf("%lld", &arr[*dataSize].month);
-        printf("일을 입력하세요: ");
-        scanf("%lld", &arr[*dataSize].day);
-    }
-
-    // 파일에 도서 코드 추가
-    FILE* file = fopen("library.csv", "a");
-    if (file == NULL) {
-        perror("파일을 열 수 없습니다.");
-        return;
-    }
-
-    // 도서 코드를 파일에 삽입하는 부분 추가
-    writeBookToFile(file, arr[*dataSize]);
-
-    fclose(file);
-
-    // 삽입된 도서 코드 출력
-    printf("도서가 추가되었습니다. 삽입된 도서 코드: %03lld%03lld%04lld%02lld%02lld\n",
-        arr[*dataSize].category, arr[*dataSize].code, arr[*dataSize].year, arr[*dataSize].month, arr[*dataSize].day);
-
-    (*dataSize)++;
 }
 
 // 도서를 데이터 배열에서 수정하는 함수
 void modifyBook(BookData arr[], int dataSize) {
-
     CLEAR_SCREEN();
+    long long int searchCode;
+    long long int code;
 
-    char input[20];
+    // 1. 값 입력
+    printf("수정할 도서코드를 입력하세요: ");
+    scanf("%lld", &searchCode);
 
-    while (true) {
-        printf("수정하려는 도서의 도서코드를 입력하세요: ");
-        scanf("%s", input);
-
-        // 입력된 코드가 유효한지 확인
-        if (!isValidCode(input)) {
-            CLEAR_SCREEN();
-            printf("입력된 값이 비정상적입니다. 올바른 도서코드를 입력하세요.\n");
-            continue; // 사용자에게 코드를 다시 입력하도록 요청
+    // 2. 도서코드 탐색
+    int foundIndex = -1;
+    for (int i = 0; i < dataSize; i++) {
+        if (arr[i].code == searchCode) {
+            foundIndex = i;
+            break;
         }
+    }
 
-        long long int searchCode = atoll(input); // 유효한 코드를 long long int로 변환
+    // 3. 도서코드가 없는 경우
+    if (foundIndex == -1) {
+        printf("해당 도서코드가 존재하지 않습니다.\n");
 
-        int foundIndex = -1;
-        for (int i = 0; i < dataSize; i++) {
-            if (arr[i].code == searchCode) {
-                foundIndex = i;
-                break;
-            }
-        }
+        char retry;
+        printf("다시 입력하시겠습니까? [y/n]: ");
+        scanf(" %c", &retry);
 
-        if (foundIndex != -1) {
-            // 수정 사항을 입력받습니다.
-            printf("도서분류 수정: ");
-            scanf("%lld", &arr[foundIndex].category);
-            printf("분류기호 수정: ");
-            scanf("%lld", &arr[foundIndex].code);
-            printf("년도 수정: ");
-            scanf("%lld", &arr[foundIndex].year);
-            printf("월 수정: ");
-            scanf("%lld", &arr[foundIndex].month);
-            printf("일 수정: ");
-            scanf("%lld", &arr[foundIndex].day);
-
-            printf("도서 정보가 수정되었습니다.\n");
-
-            // 사용자에게 다시 입력 여부를 물어봅니다.
-            char retryInput;
-            printf("다시 입력하시겠습니까? [y/n]: ");
-            scanf(" %c", &retryInput);
-
-            if (retryInput == 'y') {
-                // 다시 입력하려면 처음으로 돌아갑니다.
-                CLEAR_SCREEN();
-                continue;
-            }
-            else {
-                // 종료하려면 루프를 종료합니다.
-                break;
-            }
+        // 4. 다시 입력할 것인지 확인
+        if (retry == 'y') {
+            modifyBook(arr, dataSize); // 재귀 호출을 통해 함수 재실행
         }
         else {
-            CLEAR_SCREEN();
-            printf("일치하는 도서코드가 없습니다.\n");
+            printf("프로그램을 종료합니다.\n");
+            return; // 종료
+        }
+    }
+    else {
+        char confirmModify;
+        // 5. 수정 여부 다시 확인
+        printf("도서코드 %lld를 수정하시겠습니까? [y/n]: ", searchCode);
+        scanf(" %c", &confirmModify);
 
-            // 사용자에게 다시 입력 여부를 물어봅니다.
-            char retryInput;
-            printf("다시 입력하시겠습니까? [y/n]: ");
-            scanf(" %c", &retryInput);
+        if (confirmModify == 'y') {
+            // 6. 수정할 값을 입력받음
+            char newCode[15];
+            do {
+                printf("새로운 도서코드를 입력하세요: ");
+                scanf("%s", newCode);
 
-            if (retryInput == 'y') {
-                // 다시 입력하려면 처음으로 돌아갑니다.
-                continue;
-            }
-            else {
-                // 종료하려면 루프를 종료합니다.
-                break;
-            }
+                // 7. 입력된 값이 유효한지 확인
+                if (!isValidCode(newCode)) {
+                    printf("유효하지 않은 도서코드입니다. 다시 입력하세요.\n");
+                }
+                else {
+                    // 8. 유효한 경우, 날짜가 존재하는지 확인
+                    code = atoll(newCode);
+                    long long int category, group, year, month, day;
+                    parseCode(code, &category, &group, &year, &month, &day);
+
+                    if (!isValidDate(year, month, day)) {
+                        printf("유효하지 않은 날짜입니다. 다시 입력하세요.\n");
+                    }
+                    else {
+                        // 9. 날짜가 유효한 경우, 도서코드를 수정
+                        arr[foundIndex].code = code;
+                        printf("도서코드가 성공적으로 수정되었습니다.\n");
+
+                        // 10. 파일 열어서 수정된 코드로 덮어씌우기
+                        FILE* file = fopen("library.csv", "r");
+                        if (file == NULL) {
+                            perror("파일을 열 수 없습니다.");
+                            return;
+                        }
+
+                        // 임시 파일 생성
+                        FILE* tempFile = fopen("temp.csv", "w");
+                        if (tempFile == NULL) {
+                            perror("임시 파일을 생성할 수 없습니다.");
+                            fclose(file);
+                            return;
+                        }
+
+                        // 기존 파일을 읽어서 수정된 코드로 덮어씌우기
+                        long long int currentCode;
+                        while (fscanf(file, "%lld", &currentCode) == 1) {
+                            if (currentCode == searchCode) {
+                                // 수정된 코드로 교체
+                                fprintf(tempFile, "%lld\n", code);
+                            }
+                            else {
+                                // 기존 코드 그대로 유지
+                                fprintf(tempFile, "%lld\n", currentCode);
+                            }
+                        }
+
+                        // 파일 닫기
+                        fclose(file);
+                        fclose(tempFile);
+
+                        // 수정이 완료된 임시 파일을 원본 파일로 복사
+                        remove("library.csv"); // 원본 파일 삭제
+                        rename("temp.csv", "library.csv"); // 임시 파일을 원본 파일로 이름 변경
+
+                        break;
+                    }
+                }
+            } while (true);
+        }
+        else {
+            printf("도서코드 수정이 취소되었습니다.\n");
         }
     }
 }
 
 // 도서를 데이터 배열에서 삭제하는 함수
 void deleteBook(BookData arr[], int* dataSize) {
-
     CLEAR_SCREEN();
-
     long long int searchCode;
-    printf("삭제하려는 도서의 도서코드를 입력하세요: ");
+
+    // 1. 값 입력
+    printf("삭제할 도서코드를 입력하세요: ");
     scanf("%lld", &searchCode);
 
+    // 2. 도서코드 탐색
     int foundIndex = -1;
     for (int i = 0; i < *dataSize; i++) {
         if (arr[i].code == searchCode) {
@@ -538,14 +554,41 @@ void deleteBook(BookData arr[], int* dataSize) {
         }
     }
 
-    if (foundIndex != -1) {
-        // 마지막 도서를 삭제된 위치로 이동하고 dataSize를 감소시킵니다.
-        arr[foundIndex] = arr[*dataSize - 1];
-        (*dataSize)--;
-        printf("도서가 삭제되었습니다.\n");
+    // 3. 도서코드가 없는 경우
+    if (foundIndex == -1) {
+        printf("해당 도서코드가 존재하지 않습니다.\n");
+
+        char retry;
+        printf("다시 입력하시겠습니까? [y/n]: ");
+        scanf(" %c", &retry);
+
+        // 4. 다시 입력할 것인지 확인
+        if (retry == 'y') {
+            deleteBook(arr, dataSize); // 재귀 호출을 통해 함수 재실행
+        }
+        else {
+            printf("프로그램을 종료합니다.\n");
+            return; // 종료
+        }
     }
     else {
-        printf("일치하는 도서코드가 없습니다.\n");
+        char confirmDelete;
+        // 5. 삭제 여부 다시 확인
+        printf("도서코드 %lld를 삭제하시겠습니까? [y/n]: ", searchCode);
+        scanf(" %c", &confirmDelete);
+
+        if (confirmDelete == 'y') {
+            // 6. 삭제 수행
+            for (int i = foundIndex; i < *dataSize - 1; i++) {
+                arr[i] = arr[i + 1];
+            }
+
+            (*dataSize)--;
+            printf("도서코드가 성공적으로 삭제되었습니다.\n");
+        }
+        else {
+            printf("도서코드 삭제가 취소되었습니다.\n");
+        }
     }
 }
 
@@ -560,7 +603,7 @@ void showMainMenu() {
     printf("0. 프로그램 종료\n");
 }
 
-int runMainMenu(BookData arr[], int* dataSize, int* currentSize) {
+int runMainMenu(BookData arr[], int dataSize) {
     int choice = -1;
 
     do {
@@ -570,24 +613,24 @@ int runMainMenu(BookData arr[], int* dataSize, int* currentSize) {
 
         switch (choice) {
         case 1:
-            // 도서코드 전체 리스트 확인
-            printAllBooks(arr, *dataSize);
+            // 도서코드 전체 리스트 출력
+            printAllBooks(arr, dataSize);
             break;
         case 2:
             // 도서코드 검색
-            searchBooks(arr, *dataSize);
+            searchBooks(arr, dataSize);
             break;
         case 3:
             // 도서코드 추가
-            addBook(arr, dataSize, currentSize);
+            addBook(arr, &dataSize); // arr과 dataSize를 함수에 전달
             break;
         case 4:
             // 도서코드 수정
-            modifyBook(arr, *dataSize);
+            modifyBook(arr, dataSize);
             break;
         case 5:
             // 도서코드 삭제
-            deleteBook(arr, dataSize);
+            deleteBook(arr, &dataSize); // arr과 dataSize를 함수에 전달
             break;
         case 0:
             // 프로그램 종료
@@ -645,7 +688,7 @@ int main() {
 
     // 파일에서 데이터 읽기
     while (fscanf(file, "%lld", &data[dataSize].code) == 1) {
-        parseCode(data[dataSize].code, &data[dataSize].category, &data[dataSize].code, &data[dataSize].year, &data[dataSize].month, &data[dataSize].day);
+        parseCode(data[dataSize].code, &data[dataSize].category, &data[dataSize].group, &data[dataSize].year, &data[dataSize].month, &data[dataSize].day);
         dataSize++;
 
         // 배열 크기가 부족하면 두 배로 확장
@@ -669,11 +712,12 @@ int main() {
     int continueProgram;
 
     do {
-        continueProgram = runMainMenu(data, &dataSize, &currentSize);
+        continueProgram = runMainMenu(data, dataSize);
     } while (continueProgram != 0);
     
     // 할당된 메모리 해제
     free(data);
-
+    CLEAR_SCREEN();
+    printf("프로그램이 종료되었습니다.");
     return 0;
 }
