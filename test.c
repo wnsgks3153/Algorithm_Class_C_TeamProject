@@ -460,32 +460,30 @@ void modifyBook(BookData arr[], int dataSize) {
     }
     else {
         char confirmModify;
-        // 5. 수정 여부 다시 확인
-        printf("도서코드 %lld를 수정하시겠습니까? [y/n]: ", searchCode);
-        scanf(" %c", &confirmModify);
+        char newCode[15];
+        do {
+            printf("새로운 도서코드를 입력하세요: ");
+            scanf("%s", newCode);
 
-        if (confirmModify == 'y') {
-            // 6. 수정할 값을 입력받음
-            char newCode[15];
-            do {
-                printf("새로운 도서코드를 입력하세요: ");
-                scanf("%s", newCode);
+            // 7. 입력된 값이 유효한지 확인
+            if (!isValidCode(newCode)) {
+                printf("유효하지 않은 도서코드입니다. 다시 입력하세요.\n");
+            }
+            else {
+                // 8. 유효한 경우, 날짜가 존재하는지 확인
+                code = atoll(newCode);
+                long long int category, group, year, month, day;
+                parseCode(code, &category, &group, &year, &month, &day);
 
-                // 7. 입력된 값이 유효한지 확인
-                if (!isValidCode(newCode)) {
-                    printf("유효하지 않은 도서코드입니다. 다시 입력하세요.\n");
+                if (!isValidDate(year, month, day)) {
+                    printf("유효하지 않은 날짜입니다. 다시 입력하세요.\n");
                 }
                 else {
-                    // 8. 유효한 경우, 날짜가 존재하는지 확인
-                    code = atoll(newCode);
-                    long long int category, group, year, month, day;
-                    parseCode(code, &category, &group, &year, &month, &day);
+                  // 9. 날짜가 유효한 경우, 도서코드를 수정
+                    printf("도서코드 %lld를 %lld로 수정하시겠습니까? [y/n]: ", searchCode, code);
+                    scanf(" %c", &confirmModify);
 
-                    if (!isValidDate(year, month, day)) {
-                        printf("유효하지 않은 날짜입니다. 다시 입력하세요.\n");
-                    }
-                    else {
-                        // 9. 날짜가 유효한 경우, 도서코드를 수정
+                    if (confirmModify == 'y') {
                         arr[foundIndex].code = code;
                         printf("도서코드가 성공적으로 수정되었습니다.\n");
 
@@ -495,7 +493,7 @@ void modifyBook(BookData arr[], int dataSize) {
                             perror("파일을 열 수 없습니다.");
                             return;
                         }
-
+                        
                         // 임시 파일 생성
                         FILE* tempFile = fopen("temp.csv", "w");
                         if (tempFile == NULL) {
@@ -527,12 +525,13 @@ void modifyBook(BookData arr[], int dataSize) {
 
                         break;
                     }
+                    else {
+                        printf("도서코드 수정이 취소되었습니다.\n");
+                        break;
+                    }
                 }
-            } while (true);
-        }
-        else {
-            printf("도서코드 수정이 취소되었습니다.\n");
-        }
+            }
+        } while (true);
     }
 }
 
@@ -585,6 +584,38 @@ void deleteBook(BookData arr[], int* dataSize) {
 
             (*dataSize)--;
             printf("도서코드가 성공적으로 삭제되었습니다.\n");
+
+            // 7. 파일 열어서 삭제된 코드를 'library.csv' 파일에서 삭제
+            FILE* file = fopen("library.csv", "r");
+            if (file == NULL) {
+                perror("파일을 열 수 없습니다.");
+                return;
+            }
+
+            // 임시 파일 생성
+            FILE* tempFile = fopen("temp.csv", "w");
+            if (tempFile == NULL) {
+                perror("임시 파일을 생성할 수 없습니다.");
+                fclose(file);
+                return;
+            }
+
+            // 기존 파일을 읽어서 삭제된 코드를 'library.csv' 파일에서 삭제
+            long long int currentCode;
+            while (fscanf(file, "%lld", &currentCode) == 1) {
+                if (currentCode != searchCode) {
+                    // 삭제되지 않은 코드만 임시 파일에 쓰기
+                    fprintf(tempFile, "%lld\n", currentCode);
+                }
+            }
+
+            // 파일 닫기
+            fclose(file);
+            fclose(tempFile);
+
+            // 삭제가 완료된 임시 파일을 원본 파일로 복사
+            remove("library.csv"); // 원본 파일 삭제
+            rename("temp.csv", "library.csv"); // 임시 파일을 원본 파일로 이름 변경
         }
         else {
             printf("도서코드 삭제가 취소되었습니다.\n");
@@ -714,7 +745,7 @@ int main() {
     do {
         continueProgram = runMainMenu(data, dataSize);
     } while (continueProgram != 0);
-    
+
     // 할당된 메모리 해제
     free(data);
     CLEAR_SCREEN();
