@@ -610,7 +610,7 @@ void modifyBook(BookData arr[], int dataSize) {
                             perror("파일을 열 수 없습니다.");
                             return;
                         }
-                        
+
                         // 임시 파일 생성
                         FILE* tempFile = fopen("temp.csv", "w");
                         if (tempFile == NULL) {
@@ -620,15 +620,24 @@ void modifyBook(BookData arr[], int dataSize) {
                         }
 
                         // 기존 파일을 읽어서 수정된 코드로 덮어씌우기
-                        long long int currentCode;
-                        while (fscanf(file, "%lld", &currentCode) == 1) {
-                            if (currentCode == code) {
-                                // 수정된 코드로 교체
-                                fprintf(tempFile, "%lld\n", intNewCode);
+                        char line[100]; // 충분한 크기로 설정
+                        while (fgets(line, sizeof(line), file) != NULL) {
+                            long long int currentCode;
+
+                            // 현재 라인을 long long int로 변환
+                            if (sscanf(line, "%lld", &currentCode) == 1) {
+                                if (currentCode == code) {
+                                    // 수정된 코드로 교체
+                                    fprintf(tempFile, "%lld\n", intNewCode);
+                                }
+                                else {
+                                    // 기존 코드 그대로 유지
+                                    fprintf(tempFile, "%lld\n", currentCode);
+                                }
                             }
                             else {
-                                // 기존 코드 그대로 유지
-                                fprintf(tempFile, "%lld\n", currentCode);
+                                // 변환이 실패한 경우(문자열이 섞인 경우) 그대로 복사
+                                fprintf(tempFile, "%s", line);
                             }
                         }
 
@@ -639,7 +648,6 @@ void modifyBook(BookData arr[], int dataSize) {
                         // 수정이 완료된 임시 파일을 원본 파일로 복사
                         remove("library.csv"); // 원본 파일 삭제
                         rename("temp.csv", "library.csv"); // 임시 파일을 원본 파일로 이름 변경
-
                         break;
                     }
                     else {
@@ -735,11 +743,20 @@ void deleteBook(BookData arr[], int* dataSize) {
             }
 
             // 기존 파일을 읽어서 삭제된 코드를 'library.csv' 파일에서 삭제
-            long long int currentCode;
-            while (fscanf(file, "%lld", &currentCode) == 1) {
-                if (currentCode != searchCode) {
-                    // 삭제되지 않은 코드만 임시 파일에 쓰기
-                    fprintf(tempFile, "%lld\n", currentCode);
+            char line[100]; // 충분한 크기로 설정
+            while (fgets(line, sizeof(line), file) != NULL) {
+                long long int currentCode;
+
+                // 현재 라인을 long long int로 변환
+                if (sscanf(line, "%lld", &currentCode) == 1) {
+                    if (currentCode != searchCode) {
+                        // 삭제되지 않은 코드만 임시 파일에 쓰기
+                        fprintf(tempFile, "%lld\n", currentCode);
+                    }
+                }
+                else {
+                    // 변환이 실패한 경우(문자열이 섞인 경우) 그대로 복사
+                    fprintf(tempFile, "%s", line);
                 }
             }
 
