@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 // 페이지에 표시할 도서의 수
-#define BOOKS_PER_PAGE 8000
+#define BOOKS_PER_PAGE 4000
 
 //명령 프롬포트 화면 지우는 명령어 정의
 #ifdef _WIN32
@@ -182,6 +182,7 @@ void printAllBooks(BookData arr[], int dataSize) {
     int currentPage = 1;
     int startIdx = 0;
     int endIdx = (dataSize < BOOKS_PER_PAGE) ? dataSize - 1 : BOOKS_PER_PAGE - 1; // 마지막 페이지를 계산
+    int c;
 
     while (true) {
         printf("\t\t\t\t\t\t==== 도서 코드 목록 ====\n\n");
@@ -191,15 +192,25 @@ void printAllBooks(BookData arr[], int dataSize) {
         // 다음 페이지 또는 이전 페이지로 이동할지 여부 묻기
         char moveKey;
 
-        if (currentPage == 1) { // 첫 페이지인 경우 이전 페이지로 이동하는 옵션 비활성화
+        if (currentPage == 1) {
             printf("\t\t\t\t\t\t  [ 페이지 %d / %d ]\n\n", currentPage, totalPages);
             printf("\t\t=======================================================================================\n");
             printf("\t\t||   이전 페이지로 이동 불가   ||  다음 페이지로 이동[n]  ||         종료[q]         ||\n");
             printf("\t\t=======================================================================================\n");
             centerText("선택 : ");
-            scanf(" %c", &moveKey);
+
+            do {
+                scanf(" %c", &moveKey);
+
+                if (moveKey != 'n' && moveKey != 'q') {
+                    while ((c = getchar()) != '\n' && c != EOF); // 입력 버퍼 비우기
+                    centerText("[ 경고 ] 올바른 값을 입력하세요. (다음 페이지로 이동[n], 종료[q])\n\n");
+                    centerText("선택 : ");
+                }
+
+            } while (moveKey != 'n' && moveKey != 'q');
+
             if (moveKey == 'n' && currentPage < totalPages) {
-                // 다음 페이지로 이동
                 startIdx += BOOKS_PER_PAGE;
                 endIdx = (endIdx + BOOKS_PER_PAGE < dataSize - 1) ? endIdx + BOOKS_PER_PAGE : dataSize - 1;
                 currentPage++;
@@ -209,15 +220,25 @@ void printAllBooks(BookData arr[], int dataSize) {
                 break;
             }
         }
-        else if (currentPage == totalPages) { // 마지막 페이지인 경우 다음 페이지로 이동하는 옵션 비활성화
+        else if (currentPage == totalPages) {
             printf("\t\t\t\t\t\t  [ 페이지 %d / %d ]\n\n", currentPage, totalPages);
             printf("\t\t=======================================================================================\n");
             printf("\t\t||   이전 페이지로 이동[p]   ||  다음 페이지로 이동 불가  ||         종료[q]         ||\n");
             printf("\t\t=======================================================================================\n");
             centerText("선택 : ");
-            scanf(" %c", &moveKey);
+
+            do {
+                scanf(" %c", &moveKey);
+
+                if (moveKey != 'p' && moveKey != 'q') {
+                    while ((c = getchar()) != '\n' && c != EOF); // 입력 버퍼 비우기
+                    centerText("[ 경고 ] 올바른 값을 입력하세요. (이전 페이지로 이동[p], 종료[q])\n\n");
+                    centerText("선택 : ");
+                }
+
+            } while (moveKey != 'p' && moveKey != 'q');
+
             if (moveKey == 'p' && currentPage > 1) {
-                // 이전 페이지로 이동
                 startIdx -= BOOKS_PER_PAGE;
                 endIdx = startIdx + BOOKS_PER_PAGE - 1;
                 currentPage--;
@@ -227,23 +248,31 @@ void printAllBooks(BookData arr[], int dataSize) {
                 break;
             }
         }
-        else { // 첫 페이지, 마지막 페이지가 아닌 경우 이전페이지와 다음페이지 선택 가능
+        else {
             printf("\t\t\t\t\t\t  [ 페이지 %d / %d ]\n\n", currentPage, totalPages);
             printf("\t\t=======================================================================================\n");
             printf("\t\t||   이전 페이지로 이동[p]   ||   다음 페이지로 이동[n]   ||         종료[q]         ||\n");
             printf("\t\t=======================================================================================\n");
             centerText("선택 : ");
-            char moveKey;
-            scanf(" %c", &moveKey);
+
+            do {
+                scanf(" %c", &moveKey);
+
+                if ((moveKey != 'p') && (moveKey != 'n') && (moveKey != 'q')) {
+                    while ((c = getchar()) != '\n' && c != EOF); // 입력 버퍼 비우기
+                    centerText("[ 경고 ] 올바른 값을 입력하세요. (이전 페이지로 이동[p], 다음 페이지로 이동[n], 종료[q])\n\n");
+                    centerText("선택 : ");
+                }
+
+            } while ((moveKey != 'p') && (moveKey != 'n') && (moveKey != 'q'));
+
             if (moveKey == 'p' && currentPage > 1) {
-                // 이전 페이지로 이동
                 startIdx -= BOOKS_PER_PAGE;
                 endIdx = startIdx + BOOKS_PER_PAGE - 1;
                 currentPage--;
                 CLEAR_SCREEN();
             }
             else if (moveKey == 'n' && currentPage < totalPages) {
-                // 다음 페이지로 이동
                 startIdx += BOOKS_PER_PAGE;
                 endIdx = (endIdx + BOOKS_PER_PAGE < dataSize - 1) ? endIdx + BOOKS_PER_PAGE : dataSize - 1;
                 currentPage++;
@@ -268,7 +297,7 @@ void searchBooks(BookData arr[], int dataSize) {
     long long int searchDay;
 
     printf("\n");
-    centerText("           [ 도서 코드 검색 ]           \n");
+    centerText("[ 도서 코드 검색 ]\n");
     centerText("========================================\n");
     centerText("||      검색할 항목을 선택하세요      ||\n");
     centerText("========================================\n");
@@ -312,13 +341,13 @@ void searchBooks(BookData arr[], int dataSize) {
             break;
         }
         else { 
-            centerText("잘못된 입력입니다. 다시 입력하세요.\n");
+            centerText("잘못된 입력입니다. 다시 입력하세요.\n\n");
             while (getchar() != '\n');  // 올바르지 않은 값이 입력된 경우 다시 입력을 받음
         }
     }
 
     // 입력된 값 출력, 어떤 항목을 선택했는지 출력
-    printf("\t\t\t\t\t\t  입력된 값: %s\n", input);
+    printf("\t\t\t\t\t\t  입력된 값: %s\n\n", input);
 
     // 중복된 숫자 처리
     removeDuplicateDigits(input);
@@ -332,8 +361,10 @@ void searchBooks(BookData arr[], int dataSize) {
 
     // 검색 결과 출력
     CLEAR_SCREEN();
+    printf("\n");
+    centerText("[ 도서 코드 검색 ]\n");
     centerText("========================================\n");
-    centerText("[ 검색 결과 ]\n");
+    centerText("||              검색 결과             ||\n");
     centerText("========================================\n\n");
     int n = 0;
 
@@ -445,6 +476,11 @@ void addBook(BookData arr[], int* dataSize) {
             // 5-1단계: 날짜가 유효하지 않은 경우 다시 입력 받음
             if (!isValidDate(year, month, day)) {
                 CLEAR_SCREEN();
+                printf("\n");
+                centerText("[ 도서 코드 추가 ]\n");
+                centerText("========================================\n");
+                centerText("||                오류                ||\n");
+                centerText("========================================\n");
                 printf("유효하지 않은 날짜입니다. 다시 입력하세요.\n");
                 continue;
             }
@@ -463,14 +499,22 @@ void addBook(BookData arr[], int* dataSize) {
             // 파일 닫기
             fclose(file);
 
+            CLEAR_SCREEN();
             printf("\n");
+            centerText("[ 도서 코드 추가 ]\n");
             centerText("========================================\n");
-            centerText("도서가 성공적으로 추가되었습니다.\n");
+            centerText("||  도서가 성공적으로 추가되었습니다. ||\n");
             centerText("========================================\n");
             break;
         }
         else {
             // 3-1단계: 비정상적인 코드인 경우 대체 코드를 생성하여 파일에 추가
+            CLEAR_SCREEN();
+            printf("\n");
+            centerText("[ 도서 코드 추가 ]\n");
+            centerText("========================================\n");
+            centerText("||           대체 코드 삽입           ||\n");
+            centerText("========================================\n");
             printf("\n");
             centerText("잘못된 도서코드 형식입니다. 대체 코드를 생성하여 추가합니다.\n\n");
 
@@ -499,6 +543,8 @@ void addBook(BookData arr[], int* dataSize) {
 // 도서코드를 데이터 배열에서 수정하는 함수
 void modifyBook(BookData arr[], int dataSize) {
     CLEAR_SCREEN();
+    int choice = -1;
+    char tempCode[20];
     char searchCode[20];
     long long int code;
     char confirmModify;
@@ -515,8 +561,13 @@ void modifyBook(BookData arr[], int dataSize) {
     while (true) { // 2단계: 올바른 값이 입력될 때까지 while문 내의 과정을 반복
         printf("\n\t\t\t\t\t입력 : ");
 
-        scanf("%s", searchCode);
-
+        scanf("%s", tempCode);
+        if (strlen(tempCode) == 11) {
+            sprintf(searchCode, "000%s", tempCode);
+        }
+        else {
+            strcpy(searchCode, tempCode);
+        }
         // 2단계: 입력된 값이 유효한 코드인지 판단
         if (isValidCode(searchCode)) { // 3단계: 유효한 코드라 판단되는 경우 실행
             // 3단계: 도서코드 값을 검사하고 코드를 삽입할 수 있게 문자열을 long long int로 변환
@@ -529,14 +580,24 @@ void modifyBook(BookData arr[], int dataSize) {
             // 4-1단계: 날짜가 유효하지 않은 경우 다시 입력 받음
             if (!isValidDate(year, month, day)) {
                 CLEAR_SCREEN();
-                printf("유효하지 않은 날짜입니다. 다시 입력하세요.\n");
+                printf("\n");
+                centerText("[ 도서 코드 수정 ]\n");
+                centerText("========================================\n");
+                centerText("||                오류                ||\n");
+                centerText("========================================\n");
+                printf("\n");
+                centerText("유효하지 않은 날짜입니다. 다시 입력하세요.\n\n");
                 continue;  // 날짜가 유효하지 않으면 반복문 처음으로 돌아감
             }
-            printf("\n");
-            centerText("동일한 도서코드가 발견되었습니다.\n");
             break;
         } 
         else { // 2-1단계: 올바르지 않은 값이라 판단되는경우 다시 입력을 받음
+            CLEAR_SCREEN();
+            printf("\n");
+            centerText("[ 도서 코드 수정 ]\n");
+            centerText("========================================\n");
+            centerText("||                오류                ||\n");
+            centerText("========================================\n");
             printf("\n");
             centerText("잘못된 도서코드 형식입니다. 다시 입력하세요.\n\n");
             continue;  // 잘못된 도서코드 형식이면 반복문 처음으로 돌아감
@@ -548,6 +609,14 @@ void modifyBook(BookData arr[], int dataSize) {
     for (int i = 0; i < dataSize; i++) {
         if (arr[i].code == code) {
             foundIndex = i;
+            CLEAR_SCREEN();
+            printf("\n");
+            centerText("[ 도서 코드 수정 ]\n");
+            centerText("========================================\n");
+            centerText("||              검색 성공             ||\n");
+            centerText("========================================\n");
+            printf("\n");
+            centerText("동일한 도서코드가 발견되었습니다.\n");
             break;
         }
     }
@@ -555,6 +624,12 @@ void modifyBook(BookData arr[], int dataSize) {
 
     // 6-1단계: 파일 내에서 찾고자하는 코드가 없는 경우
     if (foundIndex == -1) {
+        CLEAR_SCREEN();
+        printf("\n");
+        centerText("[ 도서 코드 수정 ]\n");
+        centerText("========================================\n");
+        centerText("||                오류                ||\n");
+        centerText("========================================\n");
         printf("\n");
         centerText("해당 도서코드가 존재하지 않습니다.\n");
 
@@ -576,10 +651,22 @@ void modifyBook(BookData arr[], int dataSize) {
         do { // 6단계: 파일 내에서 일치하는 값을 찾은 경우 올바른 도서코드를 입력할 때까지 반복
             printf("\n");
             printf("\n\t\t\t\t    새로운 도서코드를 입력하세요: ");
-            scanf("%s", newCode); // 7단계: 파일 내에 수정할 도서코드를 어떻게 바꿀지 입력
+            scanf("%s", tempCode);
+            if (strlen(tempCode) == 11) {
+                sprintf(newCode, "000%s", tempCode);
+            }
+            else {
+                strcpy(newCode, tempCode);
+            }
 
             // 8단계: 수정된 도서코드 값이 사용 가능한지 확인
             if (!isValidCode(newCode)) { // 9-1단계: 사용불가능한 도서코드라 판단되는경우 다시 입력을 받음
+                CLEAR_SCREEN();
+                printf("\n");
+                centerText("[ 도서 코드 수정 ]\n");
+                centerText("========================================\n");
+                centerText("||                오류                ||\n");
+                centerText("========================================\n");
                 printf("\n");
                 centerText("유효하지 않은 도서코드입니다. 다시 입력하세요.\n");
             }
@@ -590,73 +677,120 @@ void modifyBook(BookData arr[], int dataSize) {
                 parseCode(intNewCode, &category, &group, &year, &month, &day);
 
                 if (!isValidDate(year, month, day)) { // 10-1단계: 날짜가 존재하지 않는다면 다시 입력을 받음
+                    CLEAR_SCREEN();
+                    printf("\n");
+                    centerText("[ 도서 코드 수정 ]\n");
+                    centerText("========================================\n");
+                    centerText("||                오류                ||\n");
+                    centerText("========================================\n");
                     printf("\n");
                     centerText("유효하지 않은 날짜입니다. 다시 입력하세요.\n");
                 }
                 else { // 10단계: 날짜가 존재한다면 도서코드를 삽입
-                    printf("\n\t\t\t    도서코드 %lld를 %lld로 수정하시겠습니까? [y/n]: ", code, intNewCode);
-                    scanf(" %c", &confirmModify);
+                    do {
+                        if (choice != 0) {
+                            CLEAR_SCREEN();
+                            printf("\n");
+                            centerText("[ 도서 코드 수정 ]\n");
+                            centerText("========================================\n");
+                            centerText("||                                    ||\n");
+                            centerText("========================================\n");
+                            printf("\n");
+                            printf("\n\t\t\t도서코드 %lld를 %lld로 수정하시겠습니까? [y/n]: ", code, intNewCode);
 
-                    if (confirmModify == 'y') {
-                        arr[foundIndex].code = intNewCode;
-                        printf("\n");
-                        centerText("========================================\n");
-                        centerText("||도서코드가 성공적으로 수정되었습니다||\n");
-                        centerText("========================================\n");
+                            int validInput = 0; // 올바른 입력 여부를 나타내는 변수 추가
 
-                        // 11단계: 파일 열어서 수정된 코드로 덮어씌우기
-                        FILE* file = fopen("library.csv", "r");
-                        if (file == NULL) {
-                            perror("파일을 열 수 없습니다.");
-                            return;
-                        }
+                            do {
+                                int c;
+                                scanf(" %c", &confirmModify);
 
-                        // 임시 파일 생성
-                        FILE* tempFile = fopen("temp.csv", "w");
-                        if (tempFile == NULL) {
-                            perror("임시 파일을 생성할 수 없습니다.");
-                            fclose(file);
-                            return;
-                        }
-
-                        // 기존 파일을 읽어서 수정된 코드로 덮어씌우기
-                        char line[100]; // 충분한 크기로 설정
-                        while (fgets(line, sizeof(line), file) != NULL) {
-                            long long int currentCode;
-
-                            // 현재 라인을 long long int로 변환
-                            if (sscanf(line, "%lld", &currentCode) == 1) {
-                                if (currentCode == code) {
-                                    // 수정된 코드로 교체
-                                    fprintf(tempFile, "%lld\n", intNewCode);
+                                // 입력이 y 또는 n인 경우에만 반복문 탈출
+                                if (confirmModify == 'y' || confirmModify == 'n') {
+                                    validInput = 1;
                                 }
                                 else {
-                                    // 기존 코드 그대로 유지
-                                    fprintf(tempFile, "%lld\n", currentCode);
+                                    while ((c = getchar()) != '\n' && c != EOF); // 입력 버퍼 비우기
+                                    CLEAR_SCREEN();
+                                    printf("\n");
+                                    centerText("[ 도서 코드 수정 ]\n");
+                                    centerText("========================================\n");
+                                    centerText("||                오류                ||\n");
+                                    centerText("========================================\n");
+                                    printf("\n");
+                                    centerText("잘못된 입력입니다.\n\n");
+                                    printf("\n\t\t\t도서코드 %lld를 %lld로 수정하시겠습니까? [y/n]: ", code, intNewCode);
                                 }
+
+                            } while (!validInput);
+
+                            if (confirmModify == 'y') {
+                                arr[foundIndex].code = intNewCode;
+                                CLEAR_SCREEN();
+                                printf("\n");
+                                centerText("[ 도서 코드 수정 ]\n");
+                                centerText("========================================\n");
+                                centerText("||도서코드가 성공적으로 수정되었습니다||\n");
+                                centerText("========================================\n");
+
+                                // 11단계: 파일 열어서 수정된 코드로 덮어씌우기
+                                FILE* file = fopen("library.csv", "r");
+                                if (file == NULL) {
+                                    perror("파일을 열 수 없습니다.");
+                                    return;
+                                }
+
+                                // 임시 파일 생성
+                                FILE* tempFile = fopen("temp.csv", "w");
+                                if (tempFile == NULL) {
+                                    perror("임시 파일을 생성할 수 없습니다.");
+                                    fclose(file);
+                                    return;
+                                }
+
+                                // 기존 파일을 읽어서 수정된 코드로 덮어씌우기
+                                char line[100]; // 충분한 크기로 설정
+                                while (fgets(line, sizeof(line), file) != NULL) {
+                                    long long int currentCode;
+
+                                    // 현재 라인을 long long int로 변환
+                                    if (sscanf(line, "%lld", &currentCode) == 1) {
+                                        if (currentCode == code) {
+                                            // 수정된 코드로 교체
+                                            fprintf(tempFile, "%lld\n", intNewCode);
+                                        }
+                                        else {
+                                            // 기존 코드 그대로 유지
+                                            fprintf(tempFile, "%lld\n", currentCode);
+                                        }
+                                    }
+                                    else {
+                                        // 변환이 실패한 경우(문자열이 섞인 경우) 그대로 복사
+                                        fprintf(tempFile, "%s", line);
+                                    }
+                                }
+
+                                // 파일 닫기
+                                fclose(file);
+                                fclose(tempFile);
+
+                                // 수정이 완료된 임시 파일을 원본 파일로 복사
+                                remove("library.csv"); // 원본 파일 삭제
+                                rename("temp.csv", "library.csv"); // 임시 파일을 원본 파일로 이름 변경
+                                break;
                             }
                             else {
-                                // 변환이 실패한 경우(문자열이 섞인 경우) 그대로 복사
-                                fprintf(tempFile, "%s", line);
+                                CLEAR_SCREEN();
+                                printf("\n");
+                                centerText("[ 도서 코드 수정 ]\n");
+                                centerText("========================================\n");
+                                centerText("||  도서코드 수정이 취소 되었습니다.  ||\n");
+                                centerText("========================================\n");
+                                break;
                             }
                         }
 
-                        // 파일 닫기
-                        fclose(file);
-                        fclose(tempFile);
-
-                        // 수정이 완료된 임시 파일을 원본 파일로 복사
-                        remove("library.csv"); // 원본 파일 삭제
-                        rename("temp.csv", "library.csv"); // 임시 파일을 원본 파일로 이름 변경
-                        break;
-                    }
-                    else {
-                        printf("\n");
-                        centerText("========================================\n");
-                        centerText("||  도서코드 수정이 취소 되었습니다.  ||\n");
-                        centerText("========================================\n");
-                        break;
-                    }
+                    } while (true);
+                    break;
                 }
             }
         } while (true);
@@ -666,7 +800,10 @@ void modifyBook(BookData arr[], int dataSize) {
 // 도서코드를 library.csv에서 삭제하는 함수
 void deleteBook(BookData arr[], int* dataSize) {
     CLEAR_SCREEN();
+    char code[20];
+    char retry;
     long long int searchCode;
+
 
     // 1단계: 삭제할 도서코드를 입력
     printf("\n");
@@ -675,7 +812,8 @@ void deleteBook(BookData arr[], int* dataSize) {
     centerText("||   삭제하실 도서코드를 입력하세요   ||\n");
     centerText("========================================\n");
     printf("\n\t\t\t\t\t입력 : ");
-    scanf("%lld", &searchCode);
+    scanf("%s", code);
+    searchCode = atoll(code);
 
     // 2단계: 파일 내에 도서코드가 있는지 검색
     int foundIndex = -1;
@@ -688,92 +826,164 @@ void deleteBook(BookData arr[], int* dataSize) {
 
     // 3-1단계: 도서코드가 없는 경우 실행
     if (foundIndex == -1) {
-        printf("\n");
-        centerText("해당 도서코드가 존재하지 않습니다.\n");
-
-        char retry;
-        printf("\n");
-        centerText("다시 입력하시겠습니까? [y/n]: ");
-        scanf(" %c", &retry);
-
-        // 3-2단계: 다시 입력할 것인지 확인
-        if (retry == 'y') {
-            deleteBook(arr, dataSize); // 재귀 호출을 통해 함수 재실행
-        }
-        else {
+        do {
+            CLEAR_SCREEN();
             printf("\n");
+            centerText("[ 도서 코드 삭제 ]\n");
             centerText("========================================\n");
-            centerText("||       프로그램을 종료합니다.       ||\n");
+            centerText("||              검색 실패             ||\n");
             centerText("========================================\n");
-            return; // 종료
-        }
+            printf("\n");
+            centerText("해당 도서코드가 존재하지 않습니다.\n");
+            printf("\n");
+            centerText("다시 입력하시겠습니까? [y/n]: ");
+
+            int validInput = 0; // 올바른 입력 여부를 나타내는 변수 추가
+
+            do {
+                int c;
+                scanf(" %c", &retry);
+                
+                // 입력이 y 또는 n인 경우에만 반복문 탈출
+                if (retry == 'y' || retry == 'n') {
+                    validInput = 1;
+                }
+                else {
+                    while ((c = getchar()) != '\n' && c != EOF); // 입력 버퍼 비우기
+                    CLEAR_SCREEN();
+                    printf("\n");
+                    centerText("[ 도서 코드 삭제 ]\n");
+                    centerText("========================================\n");
+                    centerText("||                오류                ||\n");
+                    centerText("========================================\n");
+                    printf("\n");
+                    centerText("잘못된 입력입니다.\n\n");
+                    centerText("다시 입력하시겠습니까? [y/n]: ");
+                }
+
+            } while (!validInput);
+
+            if (retry == 'y') {
+                deleteBook(arr, dataSize);
+                break;
+            }
+            else {
+                CLEAR_SCREEN();
+                printf("\n");
+                centerText("[ 도서 코드 삭제 ]\n");
+                centerText("========================================\n");
+                centerText("||       프로그램을 종료합니다.       ||\n");
+                centerText("========================================\n");
+                break; // 종료
+            }
+        
+
+        } while (true);
     }
     else { // 3단계: 파일 내에 동일한 도서코드가 있는경우 실행
         char confirmDelete;
         // 4단계: 삭제 여부 다시 확인
-        printf("\n");
-        printf("\n\t\t\t\t도서코드 %lld를 삭제하시겠습니까? [y/n]: ", searchCode);
-        scanf(" %c", &confirmDelete);
-
-        if (confirmDelete == 'y') {
-            // 5단계: 삭제 수행
-            for (int i = foundIndex; i < *dataSize - 1; i++) {
-                arr[i] = arr[i + 1];
-            }
-
-            (*dataSize)--;
+        do {
+            CLEAR_SCREEN();
             printf("\n");
+            centerText("[ 도서 코드 삭제 ]\n");
             centerText("========================================\n");
-            centerText("||도서코드가 성공적으로 삭제되었습니다||\n");
+            centerText("||                                    ||\n");
             centerText("========================================\n");
+            printf("\n");
+            printf("\n\t\t\t\t도서코드 %lld를 삭제하시겠습니까? [y/n]: ", searchCode);
 
-            // 6단계: 파일 열어서 삭제된 코드를 'library.csv' 파일에서 삭제
-            FILE* file = fopen("library.csv", "r");
-            if (file == NULL) {
-                perror("파일을 열 수 없습니다.");
-                return;
-            }
+            int validInput = 0; // 올바른 입력 여부를 나타내는 변수 초기화
 
-            // 임시 파일 생성
-            FILE* tempFile = fopen("temp.csv", "w");
-            if (tempFile == NULL) {
-                perror("임시 파일을 생성할 수 없습니다.");
-                fclose(file);
-                return;
-            }
+            do {
+                int c;
+                scanf(" %c", &confirmDelete);
 
-            // 기존 파일을 읽어서 삭제된 코드를 'library.csv' 파일에서 삭제
-            char line[100]; // 충분한 크기로 설정
-            while (fgets(line, sizeof(line), file) != NULL) {
-                long long int currentCode;
-
-                // 현재 라인을 long long int로 변환
-                if (sscanf(line, "%lld", &currentCode) == 1) {
-                    if (currentCode != searchCode) {
-                        // 삭제되지 않은 코드만 임시 파일에 쓰기
-                        fprintf(tempFile, "%lld\n", currentCode);
-                    }
+                // 입력이 y 또는 n인 경우에만 반복문 탈출
+                if (confirmDelete == 'y' || confirmDelete == 'n') {
+                    validInput = 1;
                 }
                 else {
-                    // 변환이 실패한 경우(문자열이 섞인 경우) 그대로 복사
-                    fprintf(tempFile, "%s", line);
+                    while ((c = getchar()) != '\n' && c != EOF); // 입력 버퍼 비우기
+                    CLEAR_SCREEN();
+                    printf("\n");
+                    centerText("[ 도서 코드 삭제 ]\n");
+                    centerText("========================================\n");
+                    centerText("||                오류                ||\n");
+                    centerText("========================================\n");
+                    printf("\n");
+                    centerText("잘못된 입력입니다.\n\n");
+                    printf("\n\t\t\t\t도서코드 %lld를 삭제하시겠습니까? [y/n]: ", searchCode);
                 }
+
+            } while (!validInput);
+
+            if (confirmDelete == 'y') {
+                // 5단계: 삭제 수행
+                for (int i = foundIndex; i < *dataSize - 1; i++) {
+                    arr[i] = arr[i + 1];
+                }
+
+                (*dataSize)--;
+                CLEAR_SCREEN();
+                printf("\n");
+                centerText("[ 도서 코드 수정 ]\n");
+                centerText("========================================\n");
+                centerText("||도서코드가 성공적으로 삭제되었습니다||\n");
+                centerText("========================================\n");
+
+                // 6단계: 파일 열어서 삭제된 코드를 'library.csv' 파일에서 삭제
+                FILE* file = fopen("library.csv", "r");
+                if (file == NULL) {
+                    perror("파일을 열 수 없습니다.");
+                    return;
+                }
+
+                // 임시 파일 생성
+                FILE* tempFile = fopen("temp.csv", "w");
+                if (tempFile == NULL) {
+                    perror("임시 파일을 생성할 수 없습니다.");
+                    fclose(file);
+                    return;
+                }
+
+                // 기존 파일을 읽어서 삭제된 코드를 'library.csv' 파일에서 삭제
+                char line[100]; // 충분한 크기로 설정
+                while (fgets(line, sizeof(line), file) != NULL) {
+                    long long int currentCode;
+
+                    // 현재 라인을 long long int로 변환
+                    if (sscanf(line, "%lld", &currentCode) == 1) {
+                        if (currentCode != searchCode) {
+                            // 삭제되지 않은 코드만 임시 파일에 쓰기
+                            fprintf(tempFile, "%lld\n", currentCode);
+                        }
+                    }
+                    else {
+                        // 변환이 실패한 경우(문자열이 섞인 경우) 그대로 복사
+                        fprintf(tempFile, "%s", line);
+                    }
+                }
+
+                // 파일 닫기
+                fclose(file);
+                fclose(tempFile);
+
+                // 삭제가 완료된 임시 파일을 원본 파일로 복사
+                remove("library.csv"); // 원본 파일 삭제
+                rename("temp.csv", "library.csv"); // 임시 파일을 원본 파일로 이름 변경
+                break;
             }
-
-            // 파일 닫기
-            fclose(file);
-            fclose(tempFile);
-
-            // 삭제가 완료된 임시 파일을 원본 파일로 복사
-            remove("library.csv"); // 원본 파일 삭제
-            rename("temp.csv", "library.csv"); // 임시 파일을 원본 파일로 이름 변경
-        }
-        else {
-            printf("\n");
-            centerText("========================================\n");
-            centerText("||   도서코드 삭제가 취소되었습니다   ||\n");
-            centerText("========================================\n");
-        }
+            else {
+                CLEAR_SCREEN();
+                printf("\n");
+                centerText("[ 도서 코드 수정 ]\n");
+                centerText("========================================\n");
+                centerText("||   도서코드 삭제가 취소되었습니다   ||\n");
+                centerText("========================================\n");
+                break; // 종료
+            }
+        } while (true);
     }
 }
 
@@ -808,6 +1018,7 @@ void showMainMenu() {
 // 메인메뉴 실행 함수
 int runMainMenu(BookData arr[], int dataSize) {
     int choice = -1;
+    int c;
 
     do {
         showMainMenu();
@@ -847,17 +1058,33 @@ int runMainMenu(BookData arr[], int dataSize) {
             break;
         case 0:
             // 프로그램 종료
-            printf("프로그램을 종료합니다.\n");
+            printf("프로그램이 종료되었습니다.\n");
             break;
         default:
-            printf("잘못된 입력입니다. 다시 입력하세요.\n");
+            centerText("잘못된 입력입니다. 다시 입력하세요.\n");
         }
 
         if (choice != 0) {
             char returnToMain;
+            int validInput = 0; // 올바른 입력 여부를 나타내는 변수 추가
             printf("\n");
-            printf("메인 화면으로 돌아가시겠습니까? [y/n] : ");
-            scanf(" %c", &returnToMain);
+            centerText("메인 화면으로 돌아가시겠습니까? [y/n]: ");
+
+            do {
+                scanf(" %c", &returnToMain);
+
+                // 입력이 y 또는 n인 경우에만 반복문 탈출
+                if (returnToMain == 'y' || returnToMain == 'n') {
+                    validInput = 1;
+                }
+                else {
+                    while ((c = getchar()) != '\n' && c != EOF); // 입력 버퍼 비우기
+                    printf("\n");
+                    centerText("잘못된 입력입니다.\n");
+                    centerText("메인 화면으로 돌아가시겠습니까? [y/n]: ");
+                }
+
+            } while (!validInput);
 
             if (returnToMain != 'y') {
                 choice = 0;
